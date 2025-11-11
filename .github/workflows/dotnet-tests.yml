@@ -1,31 +1,27 @@
-name: .NET Tests
+name: .NET Tests Simple
 
 on:
   push:
-    branches: [ main, master, lab1 ]
+    branches: [ "main", "Lab1" ]
   pull_request:
-    branches: [ main, master, lab1 ]
+    branches: [ "main", "Lab1" ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    
+    - name: Checkout code
+      uses: actions/checkout@v4
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
-        
-    - name: Restore dependencies
-      run: dotnet restore
-      working-directory: .
 
-    - name: Build
-      run: dotnet build --no-restore --configuration Release
-      working-directory: .
-
-    - name: Test
-      run: dotnet test --no-build --configuration Release --verbosity normal
-      working-directory: .
+    - name: Run tests directly
+      run: |
+        cd Library.Tests
+        dotnet restore
+        dotnet build
+        dotnet test --verbosity normal
