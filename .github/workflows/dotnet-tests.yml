@@ -19,10 +19,10 @@ jobs:
         dotnet-version: 8.0.x
 
     - name: Restore dependencies
-      run: dotnet restore Library.sln  
+      run: dotnet restore Library/Library.sln  
 
     - name: Build
-      run: dotnet build Library.sln --no-restore --configuration Release
+      run: dotnet build Library/Library.sln --no-restore --configuration Release
 
     - name: Test
-      run: dotnet test Library.sln --no-build --verbosity normal --configuration Release
+      run: dotnet test Library/Library.sln --no-build --verbosity normal --configuration Release
