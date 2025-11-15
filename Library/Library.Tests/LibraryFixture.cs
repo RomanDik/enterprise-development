@@ -1,6 +1,5 @@
 ﻿using Library.Domian.Entities;
-using Library.Domian.Enums;
-
+using Library.Domian;
 
 namespace Library.Tests;
 
@@ -13,9 +12,9 @@ public class LibraryFixture
 
     public LibraryFixture()
     {
-        Publishers = DataSeeder.GetPublishers();
-        Readers = DataSeeder.GetReaders();
-        Books = DataSeeder.GetBooks(Publishers);
-        Rentals = DataSeeder.GetRentals(Books, Readers);
+        Publishers = DataSeeder.Publishers;
+        Readers = DataSeeder.Readers;
+        Books = DataSeeder.Books;
+        Rentals = DataSeeder.Rentals;
     }
 }

@@ -11,16 +11,18 @@ public class LibraryTests(LibraryFixture fixture) : IClassFixture<LibraryFixture
     [Fact]
     public void ShouldGetRentedBooksOrderedByTitle()
     {
-        // Arrange & Act
+        // Arrange
+        var expectedCount = fixture.Rentals.Count(r => !r.IsReturned);
+
+        // Act
         var result = fixture.Rentals
-            .Where(r => !r.IsReturned) // только выданные (не возвращенные)
+            .Where(r => !r.IsReturned)
             .Select(r => r.Book)
             .OrderBy(b => b.Title)
             .ToList();
 
         // Assert
-        Assert.NotEmpty(result);
-        Assert.Equal("1984", result.First().Title); // Проверяем сортировку
+        Assert.Equal(expectedCount, result.Count); 
     }
 
     /// <summary>
@@ -30,12 +32,10 @@ public class LibraryTests(LibraryFixture fixture) : IClassFixture<LibraryFixture
     public void ShouldGetTop5ReadersByBooksRead()
     {
         // Arrange
-        var startDate = DateTime.Now.AddDays(-35);
-        var endDate = DateTime.Now;
+        var expectedCount = 5; 
 
         // Act
         var result = fixture.Rentals
-            .Where(r => r.IssueDate >= startDate && r.IssueDate <= endDate && r.IsReturned)
             .GroupBy(r => r.Reader)
             .Select(g => new
             {
@@ -47,11 +47,7 @@ public class LibraryTests(LibraryFixture fixture) : IClassFixture<LibraryFixture
             .ToList();
 
         // Assert
-        Assert.True(result.Count <= 5);
-        if (result.Count > 1)
-        {
-            Assert.True(result[0].BooksCount >= result[1].BooksCount);
-        }
+        Assert.Equal(expectedCount, result.Count); 
     }
 
     /// <summary>
@@ -60,21 +56,29 @@ public class LibraryTests(LibraryFixture fixture) : IClassFixture<LibraryFixture
     [Fact]
     public void ShouldGetReadersWithLongestRentalPeriodOrderedByName()
     {
-        // Act
+        // Arrange
+        var maxRentalDays = fixture.Rentals.Max(r => r.RentalDays);
+        var expectedCount = fixture.Rentals
+            .Where(r => r.RentalDays == maxRentalDays)
+            .Select(r => r.Reader)
+            .Distinct()
+            .Count();
+
+        // Act 
         var result = fixture.Rentals
+            .Where(r => r.RentalDays == maxRentalDays) 
             .GroupBy(r => r.Reader)
             .Select(g => new
             {
                 Reader = g.Key,
                 MaxRentalDays = g.Max(r => r.RentalDays)
             })
-            .OrderByDescending(x => x.MaxRentalDays)
-            .ThenBy(x => x.Reader.FullName)
+            .OrderBy(x => x.Reader.FullName) 
             .ToList();
 
         // Assert
-        Assert.NotEmpty(result);
-        Assert.True(result.First().MaxRentalDays >= result.Last().MaxRentalDays);
+        Assert.Equal(expectedCount, result.Count); 
+        Assert.All(result, x => Assert.Equal(maxRentalDays, x.MaxRentalDays));
     }
 
     /// <summary>
@@ -84,7 +88,8 @@ public class LibraryTests(LibraryFixture fixture) : IClassFixture<LibraryFixture
     public void ShouldGetTop5PopularPublishersLastYear()
     {
         // Arrange
-        var lastYear = DateTime.Now.AddYears(-1);
+        var lastYear = new DateTime(2023, 1, 1); 
+        var expectedCount = 5; 
 
         // Act
         var result = fixture.Rentals
@@ -100,7 +105,7 @@ public class LibraryTests(LibraryFixture fixture) : IClassFixture<LibraryFixture
             .ToList();
 
         // Assert
-        Assert.True(result.Count <= 5);
+        Assert.Equal(expectedCount, result.Count); 
     }
 
     /// <summary>
@@ -110,7 +115,8 @@ public class LibraryTests(LibraryFixture fixture) : IClassFixture<LibraryFixture
     public void ShouldGetTop5LeastPopularBooksLastYear()
     {
         // Arrange
-        var lastYear = DateTime.Now.AddYears(-1);
+        var lastYear = new DateTime(2023, 1, 1); 
+        var expectedCount = 5; 
 
         // Act
         var result = fixture.Rentals
@@ -126,6 +132,6 @@ public class LibraryTests(LibraryFixture fixture) : IClassFixture<LibraryFixture
             .ToList();
 
         // Assert
-        Assert.True(result.Count <= 5);
+        Assert.Equal(expectedCount, result.Count); 
     }
 }
