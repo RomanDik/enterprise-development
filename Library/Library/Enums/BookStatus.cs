@@ -1,4 +1,4 @@
-﻿namespace Library.Domian.Enums;
+﻿namespace Library.Enums;
 
 /// <summary>
 /// Определяет статусы доступности книг

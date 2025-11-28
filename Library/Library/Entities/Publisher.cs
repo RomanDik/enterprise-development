@@ -1,6 +1,4 @@
-﻿using Library.Domian.Entities;
-
-namespace Library.Domian.Entities;
+﻿namespace Library.Entities;
 
 /// <summary>
 /// Представляет издательство (справочник)

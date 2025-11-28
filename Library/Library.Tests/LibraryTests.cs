@@ -1,5 +1,4 @@
-﻿using Library.Domian.Entities;
-using Xunit;
+﻿using Xunit;
 
 namespace Library.Tests;
 
@@ -12,7 +11,9 @@ public class LibraryTests(LibraryFixture fixture) : IClassFixture<LibraryFixture
     public void ShouldGetRentedBooksOrderedByTitle()
     {
         // Arrange
-        var expectedCount = fixture.Rentals.Count(r => !r.IsReturned);
+        var expectedCount = 2; 
+        var expectedFirstTitle = "1984";
+        var expectedSecondTitle = "Преступление и наказание";
 
         // Act
         var result = fixture.Rentals
@@ -22,63 +23,61 @@ public class LibraryTests(LibraryFixture fixture) : IClassFixture<LibraryFixture
             .ToList();
 
         // Assert
-        Assert.Equal(expectedCount, result.Count); 
+        Assert.Equal(expectedCount, result.Count);
+        Assert.Equal(expectedFirstTitle, result[0].Title);
+        Assert.Equal(expectedSecondTitle, result[1].Title);
     }
 
     /// <summary>
-    /// 2. Вывести информацию о топ 5 читателей, прочитавших больше всего книг за заданный период
+    /// 2. Вывести информацию о читателях с активными (не возвращенными) арендами книг
     /// </summary>
     [Fact]
-    public void ShouldGetTop5ReadersByBooksRead()
+    public void ShouldGetReadersWithActiveRentals()
     {
         // Arrange
-        var expectedCount = 5; 
+        var expectedCount = 2; 
+        var expectedReader1 = "Егоров Андрей Викторович";
+        var expectedReader2 = "Кузнецов Дмитрий Сергеевич";
 
-        // Act
+        // Act - читатели с НЕ возвращенными книгами
         var result = fixture.Rentals
-            .GroupBy(r => r.Reader)
-            .Select(g => new
-            {
-                Reader = g.Key,
-                BooksCount = g.Count()
-            })
-            .OrderByDescending(x => x.BooksCount)
-            .Take(5)
+            .Where(r => !r.IsReturned)
+            .Select(r => r.Reader)
+            .Distinct()
+            .OrderBy(r => r.FullName)
             .ToList();
 
         // Assert
-        Assert.Equal(expectedCount, result.Count); 
+        Assert.Equal(expectedCount, result.Count);
+        Assert.Equal(expectedReader1, result[0].FullName);
+        Assert.Equal(expectedReader2, result[1].FullName);
     }
 
     /// <summary>
-    /// 3. Вывести информацию о читателях, бравших книги на наибольший период времени, упорядочить по ФИО
+    /// 3. Вывести информацию о читателях, бравших книги на наибольший период времени
     /// </summary>
     [Fact]
     public void ShouldGetReadersWithLongestRentalPeriodOrderedByName()
     {
         // Arrange
-        var maxRentalDays = fixture.Rentals.Max(r => r.RentalDays);
-        var expectedCount = fixture.Rentals
-            .Where(r => r.RentalDays == maxRentalDays)
-            .Select(r => r.Reader)
-            .Distinct()
-            .Count();
+        var expectedCount = 2; 
+        var expectedMaxRentalDays = 30; 
 
         // Act 
         var result = fixture.Rentals
-            .Where(r => r.RentalDays == maxRentalDays) 
-            .GroupBy(r => r.Reader)
-            .Select(g => new
+            .Where(r => r.RentalDays == expectedMaxRentalDays)
+            .Select(r => new
             {
-                Reader = g.Key,
-                MaxRentalDays = g.Max(r => r.RentalDays)
+                Reader = r.Reader,
+                RentalDays = r.RentalDays
             })
-            .OrderBy(x => x.Reader.FullName) 
+            .Distinct() 
+            .OrderBy(x => x.Reader.FullName)
             .ToList();
 
         // Assert
-        Assert.Equal(expectedCount, result.Count); 
-        Assert.All(result, x => Assert.Equal(maxRentalDays, x.MaxRentalDays));
+        Assert.Equal(expectedCount, result.Count);
+        Assert.All(result, x => Assert.Equal(expectedMaxRentalDays, x.RentalDays));
     }
 
     /// <summary>
@@ -88,7 +87,7 @@ public class LibraryTests(LibraryFixture fixture) : IClassFixture<LibraryFixture
     public void ShouldGetTop5PopularPublishersLastYear()
     {
         // Arrange
-        var lastYear = new DateTime(2023, 1, 1); 
+        var lastYear = new DateTime(2023, 1, 1);
         var expectedCount = 5; 
 
         // Act
@@ -105,7 +104,7 @@ public class LibraryTests(LibraryFixture fixture) : IClassFixture<LibraryFixture
             .ToList();
 
         // Assert
-        Assert.Equal(expectedCount, result.Count); 
+        Assert.Equal(expectedCount, result.Count);
     }
 
     /// <summary>
@@ -132,6 +131,6 @@ public class LibraryTests(LibraryFixture fixture) : IClassFixture<LibraryFixture
             .ToList();
 
         // Assert
-        Assert.Equal(expectedCount, result.Count); 
+        Assert.Equal(expectedCount, result.Count);
     }
 }

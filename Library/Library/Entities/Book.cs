@@ -1,8 +1,6 @@
-﻿
-using Library.Domian.Entities;
-using Library.Domian.Enums;
+﻿using Library.Enums;
 
-namespace Library.Domian.Entities;
+namespace Library.Entities;
 
 /// <summary>
 /// Представляет книгу в библиотечной системе
