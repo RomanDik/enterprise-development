@@ -1,5 +1,6 @@
 ﻿using Library.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MongoDB.EntityFrameworkCore.Extensions;
 
 namespace Library.Infrastructure;
@@ -35,6 +36,12 @@ public class LibraryDbContext(DbContextOptions options) : DbContext(options)
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        var dateOnlyConverter = new ValueConverter<DateOnly, string>(
+            v => v.ToString("yyyy-MM-dd"),
+            v => DateOnly.Parse(v)
+        );
+
 
         modelBuilder.Entity<Book>(entity =>
         {
@@ -79,9 +86,7 @@ public class LibraryDbContext(DbContextOptions options) : DbContext(options)
             entity.Property(b => b.CreatedDate)
                 .HasElementName("createdDate");
 
-            entity.HasOne(b => b.Publisher)
-                .WithMany(p => p.Books)
-                .HasForeignKey(b => b.PublisherId);
+            entity.Ignore(b => b.Publisher);
         });
 
         modelBuilder.Entity<Publisher>(entity =>
@@ -103,8 +108,7 @@ public class LibraryDbContext(DbContextOptions options) : DbContext(options)
                 .HasElementName("website")
                 .HasMaxLength(256);
 
-            entity.Property(p => p.Books)
-                .HasElementName("books");
+            entity.Ignore(p => p.Books);
         });
 
         modelBuilder.Entity<Reader>(entity =>
@@ -135,13 +139,9 @@ public class LibraryDbContext(DbContextOptions options) : DbContext(options)
 
             entity.Property(r => r.BirthDate)
                 .HasElementName("birthDate")
-                .HasConversion(
-                    v => v.HasValue ? v.Value.ToString("O") : null,
-                    v => v == null ? null : DateOnly.Parse(v)
-                );
+                .HasConversion(dateOnlyConverter);
 
-            entity.Property(r => r.Rentals)
-                .HasElementName("rentals");
+            entity.Ignore(r => r.Rentals);
         });
 
         modelBuilder.Entity<Rental>(entity =>
@@ -176,13 +176,8 @@ public class LibraryDbContext(DbContextOptions options) : DbContext(options)
                 .HasElementName("status")
                 .HasConversion<string>();
 
-            entity.HasOne(l => l.Book)
-                .WithMany()
-                .HasForeignKey(l => l.BookId);
-
-            entity.HasOne(l => l.Reader)
-                .WithMany()
-                .HasForeignKey(l => l.ReaderId);
+            entity.Ignore(l => l.Book);
+            entity.Ignore(l => l.Reader);
 
             entity.Ignore(l => l.ExpectedReturnDate);
             entity.Ignore(l => l.IsReturned);

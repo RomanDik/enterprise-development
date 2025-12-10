@@ -14,6 +14,7 @@ namespace Library.Application.Services;
 public class AnalyticsService(
     IRepository<Rental, Guid> rentalRepository,
     IRepository<Book, Guid> bookRepository,
+    IRepository<Reader, Guid> readerRepository,
     IRepository<Publisher, Guid> publisherRepository,
     IMapper mapper) : IAnalyticsService
 {
@@ -25,11 +26,22 @@ public class AnalyticsService(
     {
         var rentals = await rentalRepository.ReadAll();
 
-        var books = rentals
+        var activeBookIds = rentals
             .Where(r => !r.IsReturned)
-            .Select(r => r.Book)
-            .OrderBy(b => b.Title)
+            .Select(r => r.BookId)
+            .Distinct()
             .ToList();
+
+        if (activeBookIds.Count == 0) return [];
+
+        var books = new List<Book>(activeBookIds.Count);
+        foreach (var bookId in activeBookIds)
+        {
+            var book = await bookRepository.Read(bookId);
+            if (book is not null) books.Add(book);
+        }
+
+        books = books.OrderBy(b => b.Title).ToList();
 
         return [.. books.Select(mapper.Map<BookDto>)];
     }
@@ -42,12 +54,22 @@ public class AnalyticsService(
     {
         var rentals = await rentalRepository.ReadAll();
 
-        var readers = rentals
+        var activeReaderIds = rentals
             .Where(r => !r.IsReturned)
-            .Select(r => r.Reader)
+            .Select(r => r.ReaderId)
             .Distinct()
-            .OrderBy(r => r.FullName)
             .ToList();
+
+        if (activeReaderIds.Count == 0) return [];
+
+        var readers = new List<Reader>(activeReaderIds.Count);
+        foreach (var readerId in activeReaderIds)
+        {
+            var reader = await readerRepository.Read(readerId);
+            if (reader is not null) readers.Add(reader);
+        }
+
+        readers = readers.OrderBy(r => r.FullName).ToList();
 
         return [.. readers.Select(mapper.Map<ReaderDto>)];
     }
@@ -63,12 +85,22 @@ public class AnalyticsService(
 
         var maxDays = rentals.Max(r => r.RentalDays);
 
-        var readers = rentals
+        var readerIds = rentals
             .Where(r => r.RentalDays == maxDays)
-            .Select(r => r.Reader)
+            .Select(r => r.ReaderId)
             .Distinct()
-            .OrderBy(r => r.FullName)
             .ToList();
+
+        if (readerIds.Count == 0) return [];
+
+        var readers = new List<Reader>(readerIds.Count);
+        foreach (var readerId in readerIds)
+        {
+            var reader = await readerRepository.Read(readerId);
+            if (reader is not null) readers.Add(reader);
+        }
+
+        readers = readers.OrderBy(r => r.FullName).ToList();
 
         return [.. readers.Select(mapper.Map<ReaderDto>)];
     }
@@ -82,14 +114,29 @@ public class AnalyticsService(
     {
         var rentals = await rentalRepository.ReadAll();
 
-        var top = rentals
-            .Where(r => r.IssueDate >= fromDate)
-            .GroupBy(r => r.Book.PublisherId)
-            .Select(g => new
+        // Для определения издательства нам нужны книги (по BookId -> PublisherId)
+        var rentalsInPeriod = rentals.Where(r => r.IssueDate >= fromDate).ToList();
+        if (rentalsInPeriod.Count == 0) return [];
+
+        var bookIds = rentalsInPeriod.Select(r => r.BookId).Distinct().ToList();
+
+        var books = new List<Book>(bookIds.Count);
+        foreach (var bookId in bookIds)
+        {
+            var book = await bookRepository.Read(bookId);
+            if (book is not null) books.Add(book);
+        }
+
+        var publisherIdByBookId = books.ToDictionary(b => b.Id, b => b.PublisherId);
+
+        var top = rentalsInPeriod
+            .Select(r => new
             {
-                PublisherId = g.Key,
-                RentalCount = g.Count()
+                PublisherId = publisherIdByBookId.TryGetValue(r.BookId, out var pid) ? pid : (Guid?)null
             })
+            .Where(x => x.PublisherId.HasValue)
+            .GroupBy(x => x.PublisherId!.Value)
+            .Select(g => new { PublisherId = g.Key, RentalCount = g.Count() })
             .OrderByDescending(x => x.RentalCount)
             .Take(5)
             .ToList();
@@ -122,11 +169,7 @@ public class AnalyticsService(
         var top = rentals
             .Where(r => r.IssueDate >= fromDate)
             .GroupBy(r => r.BookId)
-            .Select(g => new
-            {
-                BookId = g.Key,
-                RentalCount = g.Count()
-            })
+            .Select(g => new { BookId = g.Key, RentalCount = g.Count() })
             .OrderBy(x => x.RentalCount)
             .Take(5)
             .ToList();
