@@ -1,4 +1,5 @@
 ﻿namespace Library.Entities;
+
 /// <summary>
 /// Представляет читателя библиотеки
 /// </summary>
