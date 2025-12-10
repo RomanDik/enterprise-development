@@ -61,15 +61,17 @@ public class LibraryTests(LibraryFixture fixture) : IClassFixture<LibraryFixture
     {
         // Arrange
         var expectedCount = 2; 
-        var expectedMaxRentalDays = 30; 
+        var expectedMaxRentalDays = 30;
+
+        var actualMaxRentalDays = fixture.Rentals.Max(r => r.RentalDays);
 
         // Act 
         var result = fixture.Rentals
-            .Where(r => r.RentalDays == expectedMaxRentalDays)
+            .Where(r => r.RentalDays == actualMaxRentalDays)
             .Select(r => new
             {
-                Reader = r.Reader,
-                RentalDays = r.RentalDays
+                r.Reader,
+                r.RentalDays
             })
             .Distinct() 
             .OrderBy(x => x.Reader.FullName)
