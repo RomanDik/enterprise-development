@@ -4,7 +4,8 @@ using Library.Application.Contracts.Analytics;
 using Library.Application.Contracts.Books;
 using Library.Application.Contracts.Publishers;
 using Library.Application.Contracts.Readers;
-using Library.Entities;
+using Library.Domain;
+using Library.Domain.Entities;
 
 namespace Library.Application.Services;
 
@@ -122,7 +123,7 @@ public class AnalyticsService(
 
         var books = new List<Book>(bookIds.Count);
         foreach (var bookId in bookIds)
-        {
+            {
             var book = await bookRepository.Read(bookId);
             if (book is not null) books.Add(book);
         }
@@ -152,7 +153,7 @@ public class AnalyticsService(
                 mapper.Map<PublisherDto>(publisher),
                 item.RentalCount
             ));
-        }
+    }
 
         return result;
     }

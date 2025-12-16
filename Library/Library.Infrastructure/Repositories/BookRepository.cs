@@ -1,4 +1,5 @@
-﻿using Library.Entities;
+﻿using Library.Domain;
+using Library.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Library.Infrastructure.Repositories;

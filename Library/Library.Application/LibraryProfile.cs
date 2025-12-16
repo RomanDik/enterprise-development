@@ -3,7 +3,7 @@ using Library.Application.Contracts.Books;
 using Library.Application.Contracts.Publishers;
 using Library.Application.Contracts.Readers;
 using Library.Application.Contracts.Rentals;
-using Library.Entities;
+using Library.Domain.Entities;
 
 namespace Library.Application;
 

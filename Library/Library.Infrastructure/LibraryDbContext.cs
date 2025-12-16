@@ -1,4 +1,4 @@
-﻿using Library.Entities;
+﻿using Library.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MongoDB.EntityFrameworkCore.Extensions;

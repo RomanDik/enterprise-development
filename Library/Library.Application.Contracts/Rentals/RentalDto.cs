@@ -1,4 +1,4 @@
-﻿using Library.Enums;
+﻿using Library.Domain.Enums;
 
 namespace Library.Application.Contracts.Rentals;
 

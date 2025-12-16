@@ -1,7 +1,7 @@
-﻿using Library.Entities;
-using Library.Enums;
+﻿using Library.Domain.Entities;
+using Library.Domain.Enums;
 
-namespace Library;
+namespace Library.Domain;
 
 public static class DataSeeder
 {

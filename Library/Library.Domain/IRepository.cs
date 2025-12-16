@@ -1,4 +1,4 @@
-﻿namespace Library;
+﻿namespace Library.Domain;
 
 /// <summary>
 /// Абстракция репозитория для выполнения стандартных операций CRUD над коллекцией сущностей

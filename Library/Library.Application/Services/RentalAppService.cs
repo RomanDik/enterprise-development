@@ -1,14 +1,15 @@
 ﻿using AutoMapper;
 using Library.Application.Contracts;
 using Library.Application.Contracts.Rentals;
-using Library.Entities;
+using Library.Domain;
+using Library.Domain.Entities;
 
 namespace Library.Application.Services;
 
 /// <summary>
 /// Сервис приложения для CRUD операций с выдачами
 /// </summary>
-public class RentalAppService(IRepository<Rental, Guid> repository, IMapper mapper)
+public class RentalAppService(IRepository<Rental, Guid> repository, IRepository<Book, Guid> bookRepository, IRepository<Reader, Guid> readerRepository, IMapper mapper)
     : IApplicationService<RentalDto, RentalCreateUpdateDto, Guid>
 {
     /// <summary>
@@ -18,6 +19,9 @@ public class RentalAppService(IRepository<Rental, Guid> repository, IMapper mapp
     /// <returns>DTO для получения созданной выдачи</returns>
     public async Task<RentalDto> Create(RentalCreateUpdateDto dto)
     {
+        _ = await bookRepository.Read(dto.BookId) ?? throw new KeyNotFoundException($"Книга для записи не найдена");
+        _ = await readerRepository.Read(dto.ReaderId) ?? throw new KeyNotFoundException($"Читатель для записи не найден");
+
         var entity = mapper.Map<Rental>(dto);
         entity.Id = Guid.NewGuid();
 

@@ -1,4 +1,3 @@
-using Library;
 using Library.Application;
 using Library.Application.Contracts;
 using Library.Application.Contracts.Books;
@@ -6,12 +5,14 @@ using Library.Application.Contracts.Publishers;
 using Library.Application.Contracts.Readers;
 using Library.Application.Contracts.Rentals;
 using Library.Application.Services;
-using Library.Entities;
 using Library.Infrastructure;
 using Library.Infrastructure.Repositories;
 using MongoDB.Driver;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
+using Library.ServiceDefaults;
+using Library.Domain.Entities;
+using Library.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,7 +54,7 @@ builder.Services.AddScoped<IApplicationService<PublisherDto, PublisherCreateUpda
 builder.Services.AddScoped<IApplicationService<ReaderDto, ReaderCreateUpdateDto, Guid>, ReaderAppService>();
 builder.Services.AddScoped<IApplicationService<RentalDto, RentalCreateUpdateDto, Guid>, RentalAppService>();
 
-builder.AddMongoDBClient("library");
+builder.AddMongoDBClient("Library");
 
 builder.Services.AddDbContext<LibraryDbContext>((services, o) =>
 {
@@ -71,24 +72,26 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-using var scope = app.Services.CreateScope();
-var dbContext = scope.ServiceProvider.GetRequiredService<LibraryDbContext>();
-
-if (!dbContext.Books.Any())
+using (var scope = app.Services.CreateScope())
 {
-    foreach (var family in DataSeeder.Books)
-        await dbContext.Books.AddAsync(family);
+    var dbContext = scope.ServiceProvider.GetRequiredService<LibraryDbContext>();
 
-    foreach (var model in DataSeeder.Publishers)
-        await dbContext.Publishers.AddAsync(model);
+    if (!dbContext.Books.Any())
+    {
+        foreach (var family in DataSeeder.Books)
+            await dbContext.Books.AddAsync(family);
 
-    foreach (var flight in DataSeeder.Readers)
-        await dbContext.Readers.AddAsync(flight);
+        foreach (var model in DataSeeder.Publishers)
+            await dbContext.Publishers.AddAsync(model);
 
-    foreach (var passenger in DataSeeder.Rentals)
-        await dbContext.Rentals.AddAsync(passenger);
+        foreach (var flight in DataSeeder.Readers)
+            await dbContext.Readers.AddAsync(flight);
 
-    await dbContext.SaveChangesAsync();
+        foreach (var passenger in DataSeeder.Rentals)
+            await dbContext.Rentals.AddAsync(passenger);
+
+        await dbContext.SaveChangesAsync();
+    }
 }
 
 app.UseHttpsRedirection();

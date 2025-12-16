@@ -1,4 +1,4 @@
-﻿namespace Library.Entities;
+﻿namespace Library.Domain.Entities;
 
 /// <summary>
 /// Представляет издательство (справочник)
@@ -28,5 +28,5 @@ public class Publisher
     /// <summary>
     /// Список книг этого издательства
     /// </summary>
-    public List<Book> Books { get; set; } = new();
+    public List<Book> Books { get; set; } = [];
 }

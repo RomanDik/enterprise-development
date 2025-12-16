@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
 using Library.Application.Contracts;
 using Library.Application.Contracts.Publishers;
-using Library.Entities;
+using Library.Domain;
+using Library.Domain.Entities;
 
 namespace Library.Application.Services;
 

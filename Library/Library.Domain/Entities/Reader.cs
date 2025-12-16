@@ -1,4 +1,4 @@
-﻿namespace Library.Entities;
+﻿namespace Library.Domain.Entities;
 
 /// <summary>
 /// Представляет читателя библиотеки
@@ -33,7 +33,7 @@ public class Reader
     /// <summary>
     /// Список выданных книг читателю
     /// </summary>
-    public List<Rental> Rentals { get; set; } = new();
+    public List<Rental> Rentals { get; set; } = [];
 
     /// <summary>
     /// Электронная почта читателя

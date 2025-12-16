@@ -1,6 +1,6 @@
-﻿using Library.Enums;
+﻿using Library.Domain.Enums;
 
-namespace Library.Entities;
+namespace Library.Domain.Entities;
 
 /// <summary>
 /// Представляет выдачу книги читателю
