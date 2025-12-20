@@ -33,6 +33,7 @@ ASP.NET Core Web API приложение, предоставляющее HTTP A
   - `RentalController`
 - `AnalyticsController` для аналитических запросов
 - Базовый контроллер `CrudControllerBase<TDto, TCreateUpdateDto, TKey>` с типовой реализацией CRUD-эндпоинтов
+- `RentalStreamingService` — фоновый сервис (gRPC клиент) для получения сгенерированных контрактов аренды
 - `Program.cs` с настройкой DI, маршрутизации и инфраструктуры API (Swagger/логирование/health checks - по конфигурации проекта)
 
 ### Library.AppHost
@@ -42,7 +43,16 @@ ASP.NET Core Web API приложение, предоставляющее HTTP A
 - Aspire-конфигурацию приложения
 - Создание контейнера MongoDB
 - Подключение и запуск `Library.Api.Host` как сервиса
+- Подключение и запуск `Library.RentalGenerator` как сервиса
 - Конфигурацию зависимостей/переменных окружения для сервисов через Aspire
+
+### Library.RentalGenerator
+Отдельный gRPC сервис для генерации тестовых данных.
+
+Содержит:
+- `RentalGeneratorService` — реализация gRPC сервера с bidirectional streaming
+- Генерацию случайных данных с использованием библиотеки Bogus
+- Настраиваемые параметры генерации (размер батча, задержка) через `appsettings.json`
 
 ### Library.Application
 Слой приложения с реализациями бизнес-сценариев и CRUD-операций.
@@ -64,6 +74,7 @@ ASP.NET Core Web API приложение, предоставляющее HTTP A
   - `IApplicationService<TDto, TCreateUpdateDto, TKey>`
   - `IAnalyticsService`
 - Профиль AutoMapper `LibraryProfile` для конфигурации маппинга
+- `Protos/rental.proto` — определение gRPC сервиса и сообщений для генерации контрактов
 
 ### Library.Infrastructure.EfCore
 Слой доступа к данным на базе EF Core провайдера MongoDB.
