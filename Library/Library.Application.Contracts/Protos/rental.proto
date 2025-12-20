@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option csharp_namespace = "Library.Application.Contracts.Protos";
+
+import "google/protobuf/timestamp.proto";
+
+service RentalGenerator {
+    rpc StreamRentals(stream RentalRequest) returns (stream RentalResponse);
+}
+
+message RentalRequest {
+    int32 count = 1;
+}
+
+message RentalResponse {
+    string book_id = 1;
+    string reader_id = 2;
+    google.protobuf.Timestamp issue_date = 3;
+    int32 rental_days = 4;
+    google.protobuf.Timestamp actual_return_date = 5;
+    bool has_actual_return_date = 6;
+    RentalStatus status = 7;
+}
+
+enum RentalStatus {
+    RENTAL_STATUS_ACTIVE = 0;
+    RENTAL_STATUS_RETURNED = 1;
+    RENTAL_STATUS_OVERDUE = 2;
+    RENTAL_STATUS_LOST = 3;
+}

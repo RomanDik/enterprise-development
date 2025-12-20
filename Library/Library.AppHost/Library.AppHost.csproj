@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Library.Api.Host\Library.Api.Host.csproj" />
+    <ProjectReference Include="..\Library.RentalGenerator\Library.RentalGenerator.csproj" />
   </ItemGroup>
 
 </Project>
