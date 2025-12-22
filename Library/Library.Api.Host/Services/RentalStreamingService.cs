@@ -3,6 +3,7 @@ using Grpc.Net.Client;
 using Library.Application.Contracts;
 using Library.Application.Contracts.Protos;
 using Library.Application.Contracts.Rentals;
+using Microsoft.Extensions.Options;
 
 namespace Library.Api.Host.Services;
 
@@ -12,19 +13,21 @@ namespace Library.Api.Host.Services;
 public class RentalStreamingService(
     IServiceScopeFactory scopeFactory,
     ILogger<RentalStreamingService> logger,
-    IConfiguration configuration) : BackgroundService
+    IConfiguration configuration,
+    IOptions<RentalStreamingOptions> options) : BackgroundService
 {
     private readonly string _grpcAddress = configuration.GetConnectionString("rental-generator")
         ?? configuration["Services:RentalGenerator:Url"]
         ?? "http://localhost:5201";
+    private readonly RentalStreamingOptions _options = options.Value;
 
     /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await Task.Delay(5000, stoppingToken);
 
-        var requestCount = configuration.GetValue("RentalStreaming:RequestCount", 10);
-        var requestIntervalMs = configuration.GetValue("RentalStreaming:RequestIntervalMs", 3000);
+        var requestCount = _options.RequestCount;
+        var requestIntervalMs = _options.RequestIntervalMs;
 
         logger.LogInformation("Starting RentalStreamingService. Generator address: {Address}", _grpcAddress);
 

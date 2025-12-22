@@ -2,14 +2,17 @@ using Bogus;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Library.Application.Contracts.Protos;
+using Microsoft.Extensions.Options;
 
 namespace Library.RentalGenerator.Services;
 
 /// <summary>
 /// gRPC сервис генерации контрактов аренды с bidirectional streaming
 /// </summary>
-public class RentalGeneratorService(ILogger<RentalGeneratorService> logger, IConfiguration configuration) : Application.Contracts.Protos.RentalGenerator.RentalGeneratorBase
+public class RentalGeneratorService(ILogger<RentalGeneratorService> logger, IOptions<RentalGenerationOptions> options) : Application.Contracts.Protos.RentalGenerator.RentalGeneratorBase
 {
+    private readonly RentalGenerationOptions _options = options.Value;
+
     private static readonly string[] _bookIds =
     [
         "50000000-0000-0000-0000-000000000001",
@@ -52,8 +55,8 @@ public class RentalGeneratorService(ILogger<RentalGeneratorService> logger, ICon
         IServerStreamWriter<RentalResponse> responseStream,
         ServerCallContext context)
     {
-        var batchSize = configuration.GetValue("RentalGeneration:BatchSize", 5);
-        var batchDelayMs = configuration.GetValue("RentalGeneration:BatchDelayMs", 1000);
+        var batchSize = _options.BatchSize;
+        var batchDelayMs = _options.BatchDelayMs;
 
         logger.LogInformation("Bidirectional streaming started. BatchSize: {BatchSize}, BatchDelayMs: {BatchDelayMs}", batchSize, batchDelayMs);
 

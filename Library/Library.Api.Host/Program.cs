@@ -13,6 +13,7 @@ using System.Text.Json.Serialization;
 using Library.ServiceDefaults;
 using Library.Domain.Entities;
 using Library.Domain;
+using Library.Api.Host;
 using Library.Api.Host.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -63,6 +64,7 @@ builder.Services.AddDbContext<LibraryDbContext>((services, o) =>
     o.UseMongoDB(db.Client, db.DatabaseNamespace.DatabaseName);
 });
 
+builder.Services.Configure<RentalStreamingOptions>(builder.Configuration.GetSection("RentalStreaming"));
 builder.Services.AddHostedService<RentalStreamingService>();
 
 var app = builder.Build();
